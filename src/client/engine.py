@@ -4,10 +4,9 @@ import sys
 import urllib.request
 import pickle
 import subprocess
-import os
 import time
 
-from config import config
+from config import config,script_dir
 
 if (__name__ != "__main__"):
     raise RuntimeError("This is not a module and should not be used manually.")
@@ -105,6 +104,7 @@ if (arg_data["ipv6_mode"]):
                     except Exception:
                         print("[ERROR] Exception while processing message on channel.")
                 if (key.data == "private"):
+                    # TODO
                     print("accepting")
                     print(private_socket.accept())
         except TimeoutError:

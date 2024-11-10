@@ -1,0 +1,75 @@
+:root {
+    --background0: #141115;
+    --background1: #2c272e;
+    --color0: #4a474b;
+    --color1: #6d6b6d;
+    --bright: #ffffff;
+}
+
+html,body {
+    margin: 0px;
+    background-color: var(--background0);
+    font-family: sans-serif;
+}
+
+
+.switch {
+    position: relative;
+    display: flex;
+    width: 125px;
+    height: 30px;
+    background-color: var(--background1);
+    border: 1px var(--color0) solid;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.switch-frame {
+    position: absolute;
+    width: calc(50% - 6px);
+    height: calc(100% - 4px);
+    background-color: var(--background0);
+    border: 1px var(--color1) solid;
+    border-radius: 5px;
+    font-weight: bold;
+    display: flex;
+    transition: transform 0.1s ease;
+    z-index: 1 !important;
+    cursor: auto !important;
+    transition: left 0.5s;
+}
+
+.switch-left,.switch-right {
+    position: absolute;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    color: var(--bright);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.switch-left {
+    left: 25%;
+}
+
+.switch-right {
+    left: 75%;
+}
+
+
+#mode-switch {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+}
+
+#mode-info {
+    position: absolute;
+    top: calc(20px + 30px + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: small;
+    color: var(--color1);
+    font-style: italic;
+}

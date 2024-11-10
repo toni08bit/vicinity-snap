@@ -1,3 +1,4 @@
+import os
 import hashlib
 
 # Manual Configuration
@@ -9,6 +10,7 @@ config = {
     "announce_interval": 3,
     "client_death_timeout": 5
 }
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Improve Configuration / Convert Values
 ## config["app_callsign"]
