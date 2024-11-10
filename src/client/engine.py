@@ -45,15 +45,16 @@ def check_dead():
         if ((client_info[0] + config["client_death_timeout"]) < time.perf_counter()):
             dead_clients.append(client_info)
     for dead_client in dead_clients:
+        print(f"[INFO] Client at {dead_client[1]} on {str(dead_client[2])} died.")
         active_clients.remove(dead_client)
 
 def register_client(address):
-    address_list = list(address)
     for client_info in active_clients:
-        if (client_info[1:] == address_list):
+        if (client_info[1:] == address):
             client_info[0] = time.perf_counter()
             return
-    active_clients.append([time.perf_counter()] + address_list)
+    print(f"[INFO] Registered new client at {address[0]} on {str(address[1])}.")
+    active_clients.append([time.perf_counter()] + address)
 
 if (arg_data["ipv6_mode"]):
     # IPv6 Mode
@@ -100,7 +101,7 @@ if (arg_data["ipv6_mode"]):
                             print("[WARN] Short message on channel.")
                             continue
                         client_port = int.from_bytes(client_port,"big")
-                        print(client_port)
+                        register_client([recv_addr[0],client_port])
                     except Exception:
                         print("[ERROR] Exception while processing message on channel.")
                 if (key.data == "private"):
@@ -109,6 +110,7 @@ if (arg_data["ipv6_mode"]):
         except TimeoutError:
             multicast.sendto((config["app_callsign"] + (private_address[1]).to_bytes(2,"big")),(config["group_addr"],config["group_port"]))
             last_announcement = time.perf_counter()
+            check_dead()
 else:
     # IPv4 Mode
     pass
