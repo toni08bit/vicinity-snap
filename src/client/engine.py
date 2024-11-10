@@ -63,17 +63,21 @@ if (arg_data["ipv6_mode"]):
 
     multicast_address = (socket.inet_pton(socket.AF_INET6,config["group_addr"]) + (b"\x00" * 4))
     private_address = private_socket.getsockname()
+    print(f"[OK] Private socket on port {str(private_address[1])}.")
 
     multicast = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
     multicast.bind(("::",config["group_port"]))
     multicast.setsockopt(socket.IPPROTO_IPV6,socket.IPV6_JOIN_GROUP,multicast_address)
     multicast.setsockopt(socket.IPPROTO_IPV6,socket.IPV6_MULTICAST_HOPS,1)
+    multicast.setsockopt(socket.IPPROTO_IPV6,socket.IPV6_MULTICAST_LOOP,0)
+    print(f"[OK] Multicast on port {str(config['group_port'])}.")
 
     default_selector = selectors.DefaultSelector()
     default_selector.register(multicast,selectors.EVENT_READ,"multicast")
     default_selector.register(private_socket,selectors.EVENT_READ,"private")
 
     last_announcement = (-config["announce_interval"])
+    print("[OK] Initialized.")
     while (True):
         announcement_wait = (config["announce_interval"] - (time.perf_counter() - last_announcement))
         try:
@@ -85,13 +89,25 @@ if (arg_data["ipv6_mode"]):
             
             for key,events in event_data:
                 if (key.data == "multicast"):
-                    print(multicast.recvfrom(len(config["callsign"]) + 2))
+                    try:
+                        pkg_len = (len(config["app_callsign"]) + 2)
+                        recv_data,recv_addr = multicast.recvfrom(pkg_len)
+                        if (recv_data[:len(config["app_callsign"])] != config["app_callsign"]):
+                            print("[WARN] Callsign mismatch in message on channel. (Possible version mismatch!)")
+                            continue
+                        client_port = recv_data[(pkg_len - 2):]
+                        if (len(client_port) != 2):
+                            print("[WARN] Short message on channel.")
+                            continue
+                        client_port = int.from_bytes(client_port,"big")
+                        print(client_port)
+                    except Exception:
+                        print("[ERROR] Exception while processing message on channel.")
                 if (key.data == "private"):
                     print("accepting")
                     print(private_socket.accept())
         except TimeoutError:
-            print("sent multicast")
-            multicast.sendto((config["callsign"] + (private_address[1]).to_bytes(2,"big")),(config["group_addr"],config["group_port"]))
+            multicast.sendto((config["app_callsign"] + (private_address[1]).to_bytes(2,"big")),(config["group_addr"],config["group_port"]))
             last_announcement = time.perf_counter()
 else:
     # IPv4 Mode
