@@ -61,11 +61,12 @@ if (arg_data["ipv6_mode"]):
     private_socket.bind(("::",0))
     private_socket.listen()
 
-    multicast_address = socket.inet_pton(socket.AF_INET6,config["group_addr"])
+    multicast_address = (socket.inet_pton(socket.AF_INET6,config["group_addr"]) + (b"\x00" * 4))
     private_address = private_socket.getsockname()
 
     multicast = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
     multicast.bind(("::",config["group_port"]))
+    multicast.setsockopt(socket.IPPROTO_IPV6,socket.IPV6_JOIN_GROUP,multicast_address)
     multicast.setsockopt(socket.IPPROTO_IPV6,socket.IPV6_MULTICAST_HOPS,1)
 
     default_selector = selectors.DefaultSelector()
@@ -89,6 +90,7 @@ if (arg_data["ipv6_mode"]):
                     print("accepting")
                     print(private_socket.accept())
         except TimeoutError:
+            print("sent multicast")
             multicast.sendto((config["callsign"] + (private_address[1]).to_bytes(2,"big")),(config["group_addr"],config["group_port"]))
             last_announcement = time.perf_counter()
 else:
