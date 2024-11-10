@@ -28,12 +28,12 @@ while (True):
         break
     time.sleep(0.5)
 
-subprocess.Popen(
-    args = ["xdg-open",browser_url],
-    stdout = subprocess.DEVNULL,
-    stdin = subprocess.DEVNULL,
-    preexec_fn = os.setpgrp
-)
+# subprocess.Popen(
+#     args = ["xdg-open",browser_url],
+#     stdout = subprocess.DEVNULL,
+#     stdin = subprocess.DEVNULL,
+#     preexec_fn = os.setpgrp
+# )
 print("\033[1m" + f"###\n\n[INFO] Open {browser_url}, if no browser has been opened automatically.\n\n###" + "\033[0m")
 
 # LAN Communication
