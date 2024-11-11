@@ -15,7 +15,6 @@ html,body {
 
 .switch {
     position: relative;
-    display: flex;
     width: 125px;
     height: 30px;
     background-color: var(--background1);
@@ -32,7 +31,6 @@ html,body {
     border: 1px var(--color1) solid;
     border-radius: 5px;
     font-weight: bold;
-    display: flex;
     transition: transform 0.1s ease;
     z-index: 1 !important;
     cursor: auto !important;
@@ -54,6 +52,51 @@ html,body {
 
 .switch-right {
     left: 75%;
+}
+
+.party {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    transform: translateX(-50%) translateY(-50%);
+    cursor: pointer;
+}
+
+.party > img {
+    position: absolute;
+    left: 50%;
+    bottom: 35%;
+    transform: translateX(-50%);
+    height: 60%;
+    filter: invert(100%);
+    transition: filter 0.5s;
+    pointer-events: none;
+}
+
+.party:hover > img {
+    filter: invert(60%) !important;
+}
+
+.party > .party-name {
+    position: absolute;
+    left: 50%;
+    bottom: 22.5%;
+    transform: translateX(-50%) translateY(50%);
+    font-size: x-small;
+    width: 100%;
+    text-align: center;
+    color: var(--bright);
+}
+
+.party > .party-info {
+    position: absolute;
+    left: 50%;
+    bottom: 7.5%;
+    transform: translateX(-50%) translateY(50%);
+    font-size: x-small;
+    width: 100%;
+    text-align: center;
+    color: var(--color1);
 }
 
 

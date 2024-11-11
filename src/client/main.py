@@ -1,6 +1,6 @@
 import os
 import multiprocessing
-import signal
+import selectors
 import json
 import outside
 
@@ -17,7 +17,7 @@ ui_path = (f"{script_dir}/ui")
 http_server = outside.OutsideHTTP(host)
 
 def server_cleanup():
-    engine_queue.put(b"")
+    engine_pipe.send(b"")
 http_server.config["server_cleanup"] = server_cleanup
 
 def main_route(request):
@@ -43,25 +43,37 @@ def main_route(request):
         return 404,"URL not found or unavailable."
 http_server.set_route("/",main_route)
 
-engine_queue = multiprocessing.Queue()
+engine_inner_pipe,engine_pipe = multiprocessing.Pipe()
 websocket_occupied = multiprocessing.Value("b",False)
 def websocket_handler(connection):
     if (websocket_occupied.value):
-        print("[WARN] WebSocket double connection prevented.")
         connection.exit()
+    print("[INFO] Connected websocket.")
+    websocket_occupied.value = True
     
     def _on_connection_exit():
         websocket_occupied.value = False
+        print("[INFO] Disconnected websocket.")
     connection.on_exit = _on_connection_exit
 
-    websocket_occupied.value = True
-    while True:
-        msg = connection.recv()
-        if (len(msg) == 0):
-            connection.exit()
-            continue
-        msg_json = json.loads(msg)
-        connection.send(msg)
+    default_selector = selectors.DefaultSelector()
+    default_selector.register(connection.pipe.fileno(),selectors.EVENT_READ,"http")
+    default_selector.register(engine_pipe.fileno(),selectors.EVENT_READ,"engine")
+    while (True):
+        event_data = default_selector.select()
+
+        for key,events in event_data:
+            if (key.data == "http"):
+                msg = connection.recv()
+                if (len(msg) == 0):
+                    continue
+                request_json = json.loads(msg)
+                if (request_json["type"] == "active_clients"):
+                    engine_pipe.send(request_json)
+                    connection.send(json.dumps(engine_pipe.recv()).encode("utf-8"))
+                    continue
+            elif (key.data == "engine"):
+                connection.send(json.dumps(engine_pipe.recv()))
         
 
 websocket_server = outside.protocol_websocket.WebSocket()
@@ -75,7 +87,7 @@ engine_process = multiprocessing.Process(
     args = [
         host,
         ipv6_enabled,
-        engine_queue
+        engine_inner_pipe
     ]
 )
 engine_process.start()
