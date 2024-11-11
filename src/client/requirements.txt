@@ -1,1 +1,1 @@
-outside-framework==1.5.4
+outside-framework==1.5.6

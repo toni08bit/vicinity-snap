@@ -1,3 +1,5 @@
+let local_socket = null
+
 // Initalization
 function on_init() {
     setup_switch(
@@ -16,6 +18,23 @@ function on_init() {
     // - Get active client list
     // - Send files
     // - Send selected mode
+}
+
+// Backend
+function connect_websocket() {
+    if (local_socket && ((local_socket.readyState == WebSocket.OPEN) || (local_socket.readyState == WebSocket.CONNECTING))) {
+        local_socket.close()
+        return
+    }
+    console.log("[INFO] Connecting socket...")
+    local_socket = (new WebSocket("/websocket"))
+    local_socket.addEventListener("open",function() {
+        local_socket.send("{}")
+    })
+    local_socket.addEventListener("close",function() {
+        console.warn("[WARN] Lost socket, attempting to reconnect...")
+        connect_websocket()
+    })
 }
 
 // Document
