@@ -110,7 +110,7 @@ def engine_process(host,ipv6_enabled,engine_pipe):
                             if (recv_data[:len(config["app_callsign"])] != config["app_callsign"]):
                                 print("[WARN] Callsign hash mismatch in message on channel. (Possible version mismatch!)")
                                 continue
-                            client_port = recv_data[len(config["app_callsign"]):]
+                            client_port = recv_data[len(config["app_callsign"]):(len(config["app_callsign"]) + 2)]
                             if (len(client_port) != 2):
                                 print("[WARN] Short message on channel.")
                                 continue
