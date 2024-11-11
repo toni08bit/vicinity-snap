@@ -73,9 +73,8 @@ def websocket_handler(connection):
                     connection.send(json.dumps(engine_pipe.recv()).encode("utf-8"))
                     continue
             elif (key.data == "engine"):
-                connection.send(json.dumps(engine_pipe.recv()))
+                connection.send(json.dumps(engine_pipe.recv()).encode("utf-8"))
         
-
 websocket_server = outside.protocol_websocket.WebSocket()
 websocket_server.connection_handler = websocket_handler
 http_server.set_route("/websocket",websocket_server)

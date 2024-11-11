@@ -18,7 +18,9 @@ function on_init() {
         local_socket.addEventListener("message",function(event) {
             event.data.text().then(function(data_text) {
                 let message_json = JSON.parse(data_text)
-                // TODO process events sent by server
+                if (message_json.type == "update_active") {
+                    refresh_clients()
+                }
             })
         })
     })
@@ -65,16 +67,17 @@ function websocket_request(request_body) {
 
 // Document
 function refresh_clients() {
+    console.log("refreshing clients")
     websocket_request({
         "type": "active_clients"
     }).then(function(response_json) {
         let clients_before = Object.keys(active_clients)
+        let clients_after = [response_json.self]
         if (!clients_before.includes(response_json.self)) {
             let new_self = _add_party(response_json.self,0.1,0.5)
             _set_party_info(new_self,"(You)")
             active_clients[response_json.self] = [new_self]
         }
-        let clients_after = []
         for (let new_client of response_json.active) {
             clients_after.push(new_client.name)
             if (!active_clients.includes(new_client)) {
