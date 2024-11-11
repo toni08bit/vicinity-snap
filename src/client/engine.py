@@ -58,7 +58,7 @@ def engine_process(host,ipv6_enabled,engine_pipe):
 
     def register_client(address):
         for client_info in active_clients:
-            if (client_info[1] == address):
+            if (client_info[1:] == address):
                 client_info[0] = time.perf_counter()
                 return
         print(f"[INFO] Registered new client at {address[0]} on {str(address[1])} as {address[2]}.")
